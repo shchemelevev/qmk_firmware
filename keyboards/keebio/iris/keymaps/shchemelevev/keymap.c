@@ -1,26 +1,74 @@
-#include QMK_KEYBOARD_H
-#include <print.h>
-
+#include "iris.h"
+#include "action_layer.h"
+#include "eeconfig.h"
 
 extern keymap_config_t keymap_config;
 
 #define _QWERTY 0
-#define _LOWER 1
-#define _RAISE 2
+#define _COLEMAK 1
+#define _LOWER 2
+#define _RAISE 3
+#define _CONFIG 5
 #define _ADJUST 16
+
+bool configOn = false;
 
 enum custom_keycodes {
   QWERTY = SAFE_RANGE,
   LOWER,
   RAISE,
+  COLEMAK,
   ADJUST,
-  ADMIN,
-  SMSPC1
+  CONFIG                     // config layer
+
 };
 
+/* Tap Dance */
 enum {
-  SFT_CAP = 0,
+  TD_LGUIAPP,                 // LGUI x1, app/menu x2
+  TD_SHIFTCAPS,               // LSHIFT x1, CAPS x3
+  TD_CTRLALTDL,               // CTRL+ALT+DEL x3
+  TD_SHIFTCLAT,               // LSHIFT x1, LCRTL x2, LALT x3, CTRL+ALT x4
 };
+
+/* NOOP Key and Transparent */
+#define KC_     KC_TRNS
+#define KC_XXXX KC_NO
+
+/* LAYERS / CUSTOM KEYS */
+#define KC_QWER QWERTY
+#define KC_COLE COLEMAK
+#define KC_CONF CONFIG
+#define KC_LOWR  LOWER
+
+/* Custom Shortened Keys (4 digits so they fit in my grid) */
+#define KC_MCTB LCTL(KC_TAB)
+#define KC_MCST LCTL(LSFT(KC_TAB))
+#define KC_CTEC CTL_T(KC_ESC)
+#define KC_SINS LSFT(KC_INS)
+#define KC_LGU1 LGUI(KC_1)
+#define KC_LGU2 LGUI(KC_2)
+#define KC_LGU3 LGUI(KC_3)
+#define KC_LGU4 LGUI(KC_4)
+#define KC_LGU5 LGUI(KC_5)
+#define KC_LGU6 LGUI(KC_6)
+#define KC_LGU7 LGUI(KC_7)
+#define KC_LGU8 LGUI(KC_8)
+#define KC_LGU9 LGUI(KC_9)
+#define KC_LGU0 LGUI(KC_0)
+#define KC_SYSR KC_SYSREQ
+#define KC_REST RESET
+
+#define KC_CONF CONFIG
+#define KC_RISE RAISE
+#define KC_COLE COLEMAK
+#define KC_QWER QWERTY
+
+/* Tap Dance */
+#define KC_LGUA TD(TD_LGUIAPP)
+#define KC_SHCP TD(TD_SHIFTCAPS)
+#define KC_CADL TD(TD_CTRLALTDL)
+#define KC_SHCA TD(TD_SHIFTCLAT)
 
 //void keyboard_post_init_user(void) {
 //  // Customise these values to desired behaviour
@@ -32,29 +80,43 @@ enum {
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
-  [_QWERTY] = LAYOUT(
-  //┌────────┬────────┬────────┬────────┬────────┬────────┐                          ┌────────┬────────┬────────┬────────┬────────┬────────┐
-     KC_ESC,  KC_1,    KC_2,    KC_3,    KC_4,    KC_5,                               KC_6,    KC_7,    KC_8,    KC_9,    KC_0,    KC_BSPC,
-  //├────────┼────────┼────────┼────────┼────────┼────────┤                          ├────────┼────────┼────────┼────────┼────────┼────────┤
-     KC_TAB,  KC_Q,    KC_W,    KC_E,    KC_R,    KC_T,                               KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,    KC_QUOT,
-  //├────────┼────────┼────────┼────────┼────────┼────────┤                          ├────────┼────────┼────────┼────────┼────────┼────────┤
-     KC_LCTL, KC_A,    KC_S,    KC_D,    KC_F,    KC_G,                               KC_H,    KC_J,    KC_K,    KC_L,    KC_SCLN, KC_ENT,
-  //├────────┼────────┼────────┼────────┼────────┼────────┼────────┐        ┌────────┼────────┼────────┼────────┼────────┼────────┼────────┤
-     KC_LSFT, KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,    KC_HOME,          KC_END,  KC_N,    KC_M,    KC_COMM, KC_DOT,  KC_SLSH, KC_RSFT,
-  //└────────┴────────┴────────┴───┬────┴───┬────┴───┬────┴───┬────┘        └───┬────┴───┬────┴───┬────┴───┬────┴────────┴────────┴────────┘
-                                    KC_LGUI, LOWER,   KC_SPC,                    KC_SPC,  RAISE,   KC_LALT
-                                // └────────┴────────┴────────┘                 └────────┴────────┴────────┘
+  [_QWERTY] = LAYOUT_kc(
+  //┌────┬────┬────┬────┬────┬────┐             ┌────┬────┬────┬────┬────┬────┐
+     ESC , 1  , 2  , 3  , 4  , 5  ,               6  , 7  , 8  , 9  , 0  ,BSPC,
+  //├────┼────┼────┼────┼────┼────┤             ├────┼────┼────┼────┼────┼────┤
+     TAB , Q  , W  , E  , R  , T  ,               Y  , U  , I  , O  , P  ,QUOT,
+  //├────┼────┼────┼────┼────┼────┤             ├────┼────┼────┼────┼────┼────┤
+     LSFT, A  , S  , D  , F  , G  ,               H  , J  , K  , L  ,SCLN,RSFT,
+  //├────┼────┼────┼────┼────┼────┼────┐   ┌────┼────┼────┼────┼────┼────┼────┤
+     LCTL, Z  , X  , C  , V  , B  ,XXXX,    XXXX, N  , M  ,COMM,DOT ,SLSH, ENT,
+  //└────┴────┴────┴────┼────┼────┼────┼───┼────┼────┼────┼────┴────┴────┴────┘
+                         LGUI,LOWR, SPC,    SPC , ENT,RISE
+                     // └────┴────┴────┘   └────┴────┴────┘
+  ),
+
+  [_COLEMAK] = LAYOUT_kc(
+  //┌────┬────┬────┬────┬────┬────┐             ┌────┬────┬────┬────┬────┬────┐
+     CTEC, 1  , 2  , 3  , 4  , 5  ,               6  , 7  , 8  , 9  , 0  ,BSPC,
+  //├────┼────┼────┼────┼────┼────┤             ├────┼────┼────┼────┼────┼────┤
+     TAB , Q  , W  , F  , P  , G  ,               J  , L  , U  , Y  ,SCLN,DEL ,
+  //├────┼────┼────┼────┼────┼────┤             ├────┼────┼────┼────┼────┼────┤
+     LSFT, A  , R  , S  , T  , D  ,               H  , N  , E  , I  , O  ,RSFT,
+  //├────┼────┼────┼────┼────┼────┼────┐   ┌────┼────┼────┼────┼────┼────┼────┤
+     SHCP, Z  , X  , C  , V  , B  ,XXXX,    XXXX, K  , M  ,COMM,DOT ,SLSH,SHCA,
+  //└────┴────┴────┴────┼────┼────┼────┼───┼────┼────┼────┼────┴────┴────┴────┘
+                         LGUI,LOWR,SPC ,    SPC, ENT, RISE
+                     // └────┴────┴────┘   └────┴────┴────┘
   ),
 
   [_LOWER] = LAYOUT(
   //┌────────┬────────┬────────┬────────┬────────┬────────┐                          ┌────────┬────────┬────────┬────────┬────────┬────────┐
      KC_TILD, KC_F1   , KC_F1,   KC_F3,   KC_F4,  KC_F5  ,                            KC_F6,   KC_F7,   KC_F8,   KC_F9,   KC_F10,  KC_BSPC,
   //├────────┼────────┼────────┼────────┼────────┼────────┤                          ├────────┼────────┼────────┼────────┼────────┼────────┤
-     _______,   KC_1,    KC_2,    KC_3,    KC_4,    KC_5,                               KC_6,    KC_7,    KC_8,    KC_9,  KC_LBRC,    _______,
+ LALT(KC_TAB),KC_1,    KC_2,    KC_3,  KC_NO, KC_5,                               KC_6,    KC_7,    KC_8,    KC_9,  KC_LBRC,    _______,
   //├────────┼────────┼────────┼────────┼────────┼────────┤                          ├────────┼────────┼────────┼────────┼────────┼────────┤
-     KC_DEL,  _______, KC_LEFT, KC_RGHT, KC_UP,   KC_LBRC,                            KC_LEFT, KC_DOWN,  KC_UP,  KC_RGHT, KC_QUOT, KC_PIPE,
+     KC_DEL,  _______, KC_LEFT, KC_RGHT, LCTL(KC_TAB),   KC_LBRC,                            KC_LEFT, KC_DOWN,  KC_UP,  KC_RGHT, KC_QUOT, KC_PIPE,
   //├────────┼────────┼────────┼────────┼────────┼────────┼────────┐        ┌────────┼────────┼────────┼────────┼────────┼────────┼────────┤
-     BL_STEP, _______, _______, _______, KC_DOWN, KC_LCBR, KC_LPRN,          KC_RPRN, KC_NO,   KC_RBRC,  KC_P2,   KC_P3,   KC_MINS, _______,
+     KC_CONF,    _______, _______, _______, KC_DOWN, KC_LCBR, KC_LPRN,          KC_RPRN, KC_NO,   KC_RBRC,  KC_P2,   KC_P3,   KC_MINS, _______,
   //└────────┴────────┴────────┴───┬────┴───┬────┴───┬────┴───┬────┘        └───┬────┴───┬────┴───┬────┴───┬────┴────────┴────────┴────────┘
                                     _______, _______, KC_DEL,                    KC_DEL,  _______, KC_P0
                                 // └────────┴────────┴────────┘                 └────────┴────────┴────────┘
@@ -62,13 +124,13 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
   [_RAISE] = LAYOUT(
   //┌────────┬────────┬────────┬────────┬────────┬────────┐                          ┌────────┬────────┬────────┬────────┬────────┬────────┐
-     KC_F12,  KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5,                              KC_F6,   KC_F7,   KC_F8,   KC_F9,   KC_F10,  KC_F11,
+     KC_F12,  KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5,                              KC_F6,   KC_F7,   KC_F8,   KC_F9,   KC_F10,  KC_BSPC,
   //├────────┼────────┼────────┼────────┼────────┼────────┤                          ├────────┼────────┼────────┼────────┼────────┼────────┤
-     RGB_TOG, KC_EXLM, KC_AT,   KC_HASH, KC_DLR,  KC_PERC,                            KC_CIRC, KC_PMNS, KC_PPLS, KC_PAST, KC_PSLS, _______,
+     RGB_TOG, KC_EXLM, KC_AT,   KC_HASH, KC_DLR,  KC_PERC,                            KC_TILD, KC_PMNS, KC_PPLS, KC_PAST, KC_PSLS, KC_CIRC,
   //├────────┼────────┼────────┼────────┼────────┼────────┤                          ├────────┼────────┼────────┼────────┼────────┼────────┤
-     RGB_MOD, KC_MPRV, KC_MNXT, KC_VOLU, KC_PGUP, KC_UNDS,                            KC_EQL,  S(KC_MINS),KC_EQL, RGB_SAI, RGB_VAI, KC_BSLS,
+     RGB_MOD, KC_MPRV, KC_MNXT, KC_VOLU, KC_PGUP, KC_UNDS,                            KC_GRV, S(KC_MINS),KC_EQL, RGB_SAI, RGB_VAI, KC_BSLS,
   //├────────┼────────┼────────┼────────┼────────┼────────┼────────┐        ┌────────┼────────┼────────┼────────┼────────┼────────┼────────┤
-     KC_MUTE, KC_MSTP, KC_MPLY, KC_VOLD, KC_PGDN, KC_MINS, KC_LPRN,          _______, KC_PLUS, KC_END,  RGB_HUD, RGB_SAD, RGB_VAD, _______,
+     KC_MUTE, KC_MSTP, KC_MPLY, KC_VOLD, KC_PGDN, KC_MINS, KC_LPRN,          _______, KC_NO, KC_LBRC, S(KC_LBRC), KC_RBRC,S(KC_LBRC), _______,
   //└────────┴────────┴────────┴───┬────┴───┬────┴───┬────┴───┬────┘        └───┬────┴───┬────┴───┬────┴───┬────┴────────┴────────┴────────┘
                                     _______, _______, _______,                   _______, _______, _______
                                 // └────────┴────────┴────────┘                 └────────┴────────┴────────┘
@@ -86,12 +148,47 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //└────────┴────────┴────────┴───┬────┴───┬────┴───┬────┴───┬────┘        └───┬────┴───┬────┴───┬────┴───┬────┴────────┴────────┴────────┘
                                     _______, _______, _______,                   _______, _______, _______
                                 // └────────┴────────┴────────┘                 └────────┴────────┴────────┘
+  ),
+
+  [_CONFIG] = LAYOUT_kc(
+  //,----+----+----+----+----+----.              ,----+----+----+----+----+----.
+     REST,XXXX,XXXX,XXXX,XXXX,XXXX,               XXXX,XXXX,XXXX,XXXX,XXXX,XXXX,
+  //|----+----+----+----+----+----|              |----+----+----+----+----+----|
+     XXXX,QWER,XXXX,XXXX,XXXX,XXXX,               XXXX,XXXX,XXXX,XXXX,XXXX,XXXX,
+  //|----+----+----+----+----+----|              |----+----+----+----+----+----|
+     XXXX,XXXX,XXXX,XXXX,XXXX,XXXX,               XXXX,XXXX,XXXX,XXXX,XXXX,XXXX,
+  //|----+----+----+----+----+----+----.    ,----|----+----+----+----+----+----|
+     XXXX,XXXX,XXXX,COLE,XXXX,XXXX,    ,         ,XXXX,XXXX,XXXX,XXXX,XXXX,XXXX,
+  //`----+----+----+--+-+----+----+----/    \----+----+----+----+----+----+----'
+                       XXXX,    ,XXXX,        XXXX,    ,XXXX
+  //                  `----+----+----'        `----+----+----'
   )
 };
 
+/* TAP DANCE */
+void shift_caps_down (qk_tap_dance_state_t *state, void *user_data) {
+  if (state->count >= 3) {
+    register_code (KC_CAPS);
+  } else {
+    register_code (KC_LSFT);
+  }
+}
+void shift_caps_up (qk_tap_dance_state_t *state, void *user_data) {
+  if (state->count >= 3) {
+    unregister_code (KC_CAPS);
+  } else {
+    unregister_code (KC_LSFT);
+  }
+}
+
 qk_tap_dance_action_t tap_dance_actions[] = {
-  [SFT_CAP] = ACTION_TAP_DANCE_DOUBLE(KC_LSFT, KC_CAPS)
+    [TD_SHIFTCAPS] = ACTION_TAP_DANCE_FN_ADVANCED (NULL, shift_caps_down, shift_caps_up),
 };
+
+void persistent_default_layer_set(uint16_t default_layer) {
+  eeconfig_update_default_layer(default_layer);
+  default_layer_set(default_layer);
+}
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   switch (keycode) {
@@ -121,23 +218,22 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
       }
       return false;
       break;
+    case COLEMAK:
+      if (record->event.pressed) {
+        set_single_persistent_default_layer(_COLEMAK);
+      }
+      return false;
+      break;
+    case CONFIG:
+      if (record->event.pressed) {
+        set_single_persistent_default_layer(_CONFIG);
+      }
+      return false;
     case ADJUST:
       if (record->event.pressed) {
         layer_on(_ADJUST);
       } else {
         layer_off(_ADJUST);
-      }
-      return false;
-      break;
-    case ADMIN:
-      if (record->event.pressed) {
-        SEND_STRING("Administrator");
-      }
-      return false;
-      break;
-    case SMSPC1:
-      if (record->event.pressed) {
-        SEND_STRING("Simspace1!");
       }
       return false;
       break;
