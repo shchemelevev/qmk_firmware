@@ -5,22 +5,21 @@
 extern keymap_config_t keymap_config;
 
 #define _QWERTY 0
-#define _COLEMAK 1
-#define _LOWER 2
-#define _RAISE 3
+#define _COLEMAK_DH 1
+#define _DOTA 2
+#define _LOWER 3
+#define _RAISE 4
 #define _CONFIG 5
-#define _ADJUST 16
 
 bool configOn = false;
 
 enum custom_keycodes {
   QWERTY = SAFE_RANGE,
+  COLEMAK,
+  DOTA,
   LOWER,
   RAISE,
-  COLEMAK,
-  ADJUST,
   CONFIG                     // config layer
-
 };
 
 /* Tap Dance */
@@ -40,6 +39,7 @@ enum {
 #define KC_COLE COLEMAK
 #define KC_CONF CONFIG
 #define KC_LOWR  LOWER
+#define KC_DOTA  DOTA
 
 /* Custom Shortened Keys (4 digits so they fit in my grid) */
 #define KC_MCTB LCTL(KC_TAB)
@@ -94,15 +94,29 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                      // └────┴────┴────┘   └────┴────┴────┘
   ),
 
-  [_COLEMAK] = LAYOUT_kc(
+  [_DOTA] = LAYOUT_kc(
+  //┌────┬────┬────┬────┬────┬────┐             ┌────┬────┬────┬────┬────┬────┐
+     ESC , 1  , 2  , 3  , 4  , 5  ,               6  , 7  , 8  , 9  , 0  ,BSPC,
+  //├────┼────┼────┼────┼────┼────┤             ├────┼────┼────┼────┼────┼────┤
+     TAB , Q  , W  , E  , R  , T  ,               Y  , U  , I  , O  , P  ,QUOT,
+  //├────┼────┼────┼────┼────┼────┤             ├────┼────┼────┼────┼────┼────┤
+     LSFT, A  , S  , D  , F  , G  ,               H  , J  , K  , L  ,SCLN,RSFT,
+  //├────┼────┼────┼────┼────┼────┼────┐   ┌────┼────┼────┼────┼────┼────┼────┤
+     LCTL, Z  , X  , C  , V  , B  ,XXXX,    XXXX, N  , M  ,COMM,DOT ,SLSH, ENT,
+  //└────┴────┴────┴────┼────┼────┼────┼───┼────┼────┼────┼────┴────┴────┴────┘
+                         LALT,LOWR, SPC,    SPC , ENT,RISE
+                     // └────┴────┴────┘   └────┴────┴────┘
+  ),
+
+  [_COLEMAK_DH] = LAYOUT_kc(
   //┌────┬────┬────┬────┬────┬────┐             ┌────┬────┬────┬────┬────┬────┐
      CTEC, 1  , 2  , 3  , 4  , 5  ,               6  , 7  , 8  , 9  , 0  ,BSPC,
   //├────┼────┼────┼────┼────┼────┤             ├────┼────┼────┼────┼────┼────┤
-     TAB , Q  , W  , F  , P  , G  ,               J  , L  , U  , Y  ,SCLN,DEL ,
+     TAB , Q  , W  , F  , P  , B  ,               J  , L  , U  , Y  ,SCLN,DEL ,
   //├────┼────┼────┼────┼────┼────┤             ├────┼────┼────┼────┼────┼────┤
-     LSFT, A  , R  , S  , T  , D  ,               H  , N  , E  , I  , O  ,RSFT,
+     LSFT, A  , R  , S  , T  , G  ,               M  , N  , E  , I  , O  ,RSFT,
   //├────┼────┼────┼────┼────┼────┼────┐   ┌────┼────┼────┼────┼────┼────┼────┤
-     SHCP, Z  , X  , C  , V  , B  ,XXXX,    XXXX, K  , M  ,COMM,DOT ,SLSH,SHCA,
+     LSFT, Z  , X  , C  , D  , V  ,XXXX,    XXXX, K  , H  ,COMM,DOT ,SLSH,ENT,
   //└────┴────┴────┴────┼────┼────┼────┼───┼────┼────┼────┼────┴────┴────┴────┘
                          LGUI,LOWR,SPC ,    SPC, ENT, RISE
                      // └────┴────┴────┘   └────┴────┴────┘
@@ -130,25 +144,12 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //├────────┼────────┼────────┼────────┼────────┼────────┤                          ├────────┼────────┼────────┼────────┼────────┼────────┤
      RGB_MOD, KC_MPRV, KC_MNXT, KC_VOLU, KC_PGUP, KC_UNDS,                            KC_GRV, S(KC_MINS),KC_EQL, RGB_SAI, RGB_VAI, KC_BSLS,
   //├────────┼────────┼────────┼────────┼────────┼────────┼────────┐        ┌────────┼────────┼────────┼────────┼────────┼────────┼────────┤
-     KC_MUTE, KC_MSTP, KC_MPLY, KC_VOLD, KC_PGDN, KC_MINS, KC_LPRN,          _______, KC_NO, KC_LBRC, S(KC_LBRC), KC_RBRC,S(KC_LBRC), _______,
+     KC_CONF, KC_MSTP, KC_MPLY, KC_VOLD, KC_PGDN, KC_MINS, KC_LPRN,          _______, KC_NO, KC_LBRC, S(KC_LBRC), KC_RBRC,S(KC_LBRC), _______,
   //└────────┴────────┴────────┴───┬────┴───┬────┴───┬────┴───┬────┘        └───┬────┴───┬────┴───┬────┴───┬────┴────────┴────────┴────────┘
                                     _______, _______, _______,                   _______, _______, _______
                                 // └────────┴────────┴────────┘                 └────────┴────────┴────────┘
   ),
 
-  [_ADJUST] = LAYOUT(
-  //┌────────┬────────┬────────┬────────┬────────┬────────┐                          ┌────────┬────────┬────────┬────────┬────────┬────────┐
-     _______, _______, _______, _______, _______, _______,                            _______, _______, _______, _______, _______, _______,
-  //├────────┼────────┼────────┼────────┼────────┼────────┤                          ├────────┼────────┼────────┼────────┼────────┼────────┤
-     _______, _______, _______, _______, _______, _______,                            _______, _______, _______, _______, _______, _______,
-  //├────────┼────────┼────────┼────────┼────────┼────────┤                          ├────────┼────────┼────────┼────────┼────────┼────────┤
-     _______, _______, _______, _______, _______, _______,                            _______, _______, _______, _______, _______, _______,
-  //├────────┼────────┼────────┼────────┼────────┼────────┼────────┐        ┌────────┼────────┼────────┼────────┼────────┼────────┼────────┤
-     _______, _______, _______, _______, _______, _______, _______,          _______, _______, _______, _______, _______, _______, _______,
-  //└────────┴────────┴────────┴───┬────┴───┬────┴───┬────┴───┬────┘        └───┬────┴───┬────┴───┬────┴───┬────┴────────┴────────┴────────┘
-                                    _______, _______, _______,                   _______, _______, _______
-                                // └────────┴────────┴────────┘                 └────────┴────────┴────────┘
-  ),
 
   [_CONFIG] = LAYOUT_kc(
   //,----+----+----+----+----+----.              ,----+----+----+----+----+----.
@@ -156,7 +157,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //|----+----+----+----+----+----|              |----+----+----+----+----+----|
      XXXX,QWER,XXXX,XXXX,XXXX,XXXX,               XXXX,XXXX,XXXX,XXXX,XXXX,XXXX,
   //|----+----+----+----+----+----|              |----+----+----+----+----+----|
-     XXXX,XXXX,XXXX,XXXX,XXXX,XXXX,               XXXX,XXXX,XXXX,XXXX,XXXX,XXXX,
+     XXXX,XXXX,XXXX,DOTA,XXXX,XXXX,               XXXX,XXXX,XXXX,XXXX,XXXX,XXXX,
   //|----+----+----+----+----+----+----.    ,----|----+----+----+----+----+----|
      XXXX,XXXX,XXXX,COLE,XXXX,XXXX,    ,         ,XXXX,XXXX,XXXX,XXXX,XXXX,XXXX,
   //`----+----+----+--+-+----+----+----/    \----+----+----+----+----+----+----'
@@ -198,42 +199,37 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
       }
       return false;
       break;
+    case COLEMAK:
+      if (record->event.pressed) {
+        set_single_persistent_default_layer(_COLEMAK_DH);
+      }
+      return false;
+      break;
+    case DOTA:
+      if (record->event.pressed) {
+        set_single_persistent_default_layer(_DOTA);
+      }
+      return false;
+      break;
     case LOWER:
       if (record->event.pressed) {
         layer_on(_LOWER);
-        update_tri_layer(_LOWER, _RAISE, _ADJUST);
       } else {
         layer_off(_LOWER);
-        update_tri_layer(_LOWER, _RAISE, _ADJUST);
       }
       return false;
       break;
     case RAISE:
       if (record->event.pressed) {
         layer_on(_RAISE);
-        update_tri_layer(_LOWER, _RAISE, _ADJUST);
       } else {
         layer_off(_RAISE);
-        update_tri_layer(_LOWER, _RAISE, _ADJUST);
-      }
-      return false;
-      break;
-    case COLEMAK:
-      if (record->event.pressed) {
-        set_single_persistent_default_layer(_COLEMAK);
       }
       return false;
       break;
     case CONFIG:
       if (record->event.pressed) {
         set_single_persistent_default_layer(_CONFIG);
-      }
-      return false;
-    case ADJUST:
-      if (record->event.pressed) {
-        layer_on(_ADJUST);
-      } else {
-        layer_off(_ADJUST);
       }
       return false;
       break;
